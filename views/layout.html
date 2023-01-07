@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="loggedin">
+    <div class="ui main text container">
+        <h1 class="ui header">Real Time attendence system</h1>
+        <p>{% block profile %}{% endblock %}</p>
+        <div class="ui borderless main menu">
+            <a class="item" href="{{ url_for('home') }}">
+              Home
+            </a>
+            <a class="item" href="{{ url_for('profile') }}">
+              Profile
+            </a>
+            <div class="right menu">
+              <a class="item" href="{{ url_for('logout') }}">
+                Logout
+              </a>
+            </div>
+        </div>
+        <div class="ui text container">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>
