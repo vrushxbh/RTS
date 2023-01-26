@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
 import re
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import Flask, Response, flash, redirect, render_template, request, session, url_for
 import os
+import cv2
 import psycopg2
 import psycopg2.extras
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -27,6 +28,43 @@ app = Flask(__name__, template_folder=template_dir)
 app.secret_key = os.getenv("SECRET_KEY")
 
 connection = psycopg2.connect(url)
+
+face_cascade = cv2.CascadeClassifier()
+
+# Load the pretrained model
+face_cascade.load(cv2.samples.findFile("static/haarcascade_frontalface_alt.xml"))
+
+def gen_frames():
+    video = cv2.VideoCapture(0)
+    while True:
+        success, frame = video.read()
+        if success != True:
+            break
+        else:
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+
+        yield(b'--frame\r\n' 
+        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        if cv2.waitKey(1)==27:
+            break
+    #video.release()
+
+def gen():
+    cap = cv2.VideoCapture(0)
+    ret = True
+    while ret:
+        ret,frame = cap.read()
+        #if extract_faces(frame)!=():
+        if ret != False:
+            cv2.putText(frame,'test',(30,30),cv2.FONT_HERSHEY_SIMPLEX,1,(255, 0, 20),2,cv2.LINE_AA)
+        else:
+            print('Closed')
+        cv2.imshow('Attendance',frame)
+        if cv2.waitKey(1)==27:
+            break
+    cap.release()
+    cv2.destroyAllWindows()
 
 @app.route('/')
 def home():
@@ -111,6 +149,27 @@ def profile():
         return render_template('profile.html', account=account)
     
     return redirect(url_for('login'))
+
+@app.route('/recognize')
+def recognize():
+    cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    if 'loggedin' in session:
+        cursor.execute('SELECT * FROM emp WHERE e_id = %s', [(session['id'])])
+        account = cursor.fetchone()
+
+        return render_template('recognize.html', account=account)
+    return redirect(url_for('login'))
+
+@app.route('/video_feed')
+def video():
+    global video
+    #return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    gen()
+    #return Response('Closed')
+    return redirect(url_for('recognize'))
+
+
 """
 url = os.getenv("DATABASE_URL")
 connection = psycopg2.connect(url)

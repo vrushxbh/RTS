@@ -1,0 +1,27 @@
+body {
+    padding: 0;
+    margin: 0;
+}
+
+.row {
+    display: flex;
+}
+  
+.column {
+    float: left;
+}
+
+.right-sec {
+    text-align: right;
+    width: 25%;
+}
+
+.left {
+    width: 75%;
+}
+
+.video-feed {
+    border: 6px solid black;
+    width: 100%;
+    height: auto;
+}

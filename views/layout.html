@@ -7,18 +7,51 @@
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.css">
     <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js" integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
-<body class="loggedin">
+<body class="loggedin" onload="startTime()">
     <div class="ui main text container">
-        <h1 class="ui header">Real Time attendence system</h1>
-        <p>{% block profile %}{% endblock %}</p>
+        
+        <div class="row">
+          <div class="column left">
+            <h1>Real Time attendence system</h1>
+          </div>
+          <div class="column right-sec" id="datetime">
+          </div>
+        </div>
+        <div>
+          {% block profile %}{% endblock %}
+        </div>
+        <script>
+          function startTime() {
+            const today = new Date();
+            let h = today.getHours();
+            let m = today.getMinutes();
+            let s = today.getSeconds();
+            let y = today.getFullYear();
+            let mo = today.getMonth() + 1;
+            let d = today.getDate();
+            m = checkTime(m);
+            s = checkTime(s);
+            document.getElementById('datetime').innerHTML = d+"/"+mo+"/"+y+", "+h+":"+m+":"+s;
+            setTimeout(startTime,1000);
+          }
+
+          function checkTime(i) {
+            if (i < 10) {i="0"+i};
+            return i;
+          }
+        </script>
         <div class="ui borderless main menu">
             <a class="item" href="{{ url_for('home') }}">
               Home
             </a>
             <a class="item" href="{{ url_for('profile') }}">
               Profile
+            </a>
+            <a class="item" href="{{ url_for('recognize') }}">
+              Attendence
             </a>
             <div class="right menu">
               <a class="item" href="{{ url_for('logout') }}">
