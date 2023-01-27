@@ -1,0 +1,31 @@
+.main{
+background-color: #3C0DFD;
+padding: 8em 0em;
+}
+
+.left-background-image {
+    background-image: url("https://www.acixme.com/wp-content/uploads/2022/08/auto-prodduct.png"); 
+    background-color: #cccccc; 
+    background-position: center;
+    background-repeat: no-repeat; 
+    background-size: cover; 
+  }
+
+.input-styling{
+    width: 80%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 2;
+    color: #212529;
+    background-color: #fff;
+    border: 3px solid #000000;
+    margin: 5% 10%;
+    box-shadow: 5px 5px;
+    border-radius: 0rem;
+}
+
+.input-styling-button{    
+    box-shadow: 3px 3px #3C0DFD;
+    border-radius: 0rem;
+}
