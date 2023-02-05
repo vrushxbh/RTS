@@ -111,6 +111,17 @@ def profile():
         return render_template('profile.html', account=account)
     
     return redirect(url_for('login'))
+
+@app.route('/recognize')
+def recognize():
+    cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    if 'loggedin' in session:
+        cursor.execute('SELECT * FROM emp WHERE e_id = %s', [(session['id'])])
+        account = cursor.fetchone()
+
+        return render_template('recognize.html', account=account)
+    return redirect(url_for('login'))
 """
 url = os.getenv("DATABASE_URL")
 connection = psycopg2.connect(url)

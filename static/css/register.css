@@ -1,6 +1,9 @@
 .main{
-background-color: #3C0DFD;
+/* background-color: #3C0DFD; */
+background-color: #F1F1F1;
 padding: 8em 0em;
+height: 100vh;
+font-family: 'Space Grotesk', sans-serif;
 }
 
 .left-background-image {
@@ -9,23 +12,54 @@ padding: 8em 0em;
     background-position: center;
     background-repeat: no-repeat; 
     background-size: cover; 
-  }
+}
+
+.input-styling-label{
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 2;
+    color: #212529;
+    margin: 0% 10%;
+}
+
+input:focus{
+    outline: none;
+}
 
 .input-styling{
     width: 80%;
     padding: 0.375rem 0.75rem;
-    font-size: 1rem;
+    font-size: 1.3rem;
     font-weight: 400;
     line-height: 2;
     color: #212529;
     background-color: #fff;
     border: 3px solid #000000;
-    margin: 5% 10%;
+    margin: 0 10%;
     box-shadow: 5px 5px;
     border-radius: 0rem;
 }
 
 .input-styling-button{    
-    box-shadow: 3px 3px #3C0DFD;
+    box-shadow: 4px 4px black;
     border-radius: 0rem;
+    font-size: 1.5rem;
+    border: 4px solid black;
+    background-color: #341A61;
+}
+
+.input-styling-button:hover{    
+    background-color: #763adf;
+    border: 4px solid black;
+}
+
+.cust-card{
+    border: 5px solid #000000;
+}
+
+.login-title{
+    text-align:center;
+    border-bottom: 5px solid black;
+    font-family: 'Archivo', sans-serif ;
+    font-size: 4rem;
 }
