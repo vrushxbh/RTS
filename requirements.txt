@@ -2,3 +2,7 @@ flask
 python-dotenv
 psycopg2-binary
 opencv-python
+dlib
+cmake
+face_recognition
+joblib

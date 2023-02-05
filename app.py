@@ -7,6 +7,10 @@ import psycopg2
 import psycopg2.extras
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
+import face_recognition
+import numpy as np
+import joblib
+import sqlite3
 
 CREATE_EMPLOYEE_TABLE = (
     "CREATE TABLE IF NOT EXISTS emp (e_id SERIAL PRIMARY KEY, fullname TEXT, username TEXT, password TEXT, email TEXT, created_on TIMESTAMP);"
@@ -22,6 +26,7 @@ load_dotenv()
 
 template_dir = os.getenv("TEMPLATE_DIR")
 url = os.getenv("DATABASE_URL")
+face_path = os.getenv("FACE_DIR")
 
 
 app = Flask(__name__, template_folder=template_dir)
@@ -32,7 +37,11 @@ connection = psycopg2.connect(url)
 face_cascade = cv2.CascadeClassifier()
 
 # Load the pretrained model
-face_cascade.load(cv2.samples.findFile("static/haarcascade_frontalface_alt.xml"))
+#face_cascade.load(cv2.samples.findFile("static/haarcascade_frontalface_alt.xml"))
+def get_db_connection():
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+    return conn
 
 def gen_frames():
     video = cv2.VideoCapture(0)
@@ -50,26 +59,153 @@ def gen_frames():
             break
     #video.release()
 
+def mark_attendence(id):
+    # att_path = os.getenv("ATTENDENCE_DIR")
+    # att_path = att_path + "/" + datetime.now().strftime('%B')+str(datetime.now().year)
+    # if os.path.exists(att_path) == True:
+    #     print('Directory exists')
+    # else:
+    #     os.makedirs(att_path)
+    #     print('Directory created!')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    query = "SELECT COUNT(*) FROM attendences WHERE s_id = "+id+" AND date = DATE('now')"
+    rec_exists = True if (cursor.execute(query).fetchone())[0] > 0 else False
+    if rec_exists == True:
+        print("Record already exists for today.")
+    else:
+        #cursor.execute("SELECT s.s_id, s.f_name,")
+        conn.execute("INSERT INTO attendences(s_id, f_name, class_id, course_id, date, time) VALUES (?,?,?,?,?,?)",
+                     (id, "Test", "1", "2", "5/2/2023","15:30"))
+    conn.commit()
+    conn.close()
+
+def calculate_histogram(image):
+    histogram = [0] * 3
+    for i in range(3):
+        hist = cv2.calcHist([image], [i], None, [256], [0, 256])
+        hist *= 255.0 / hist.max()
+        histogram[i] = hist
+    return np.array(histogram)
+
+def find_encodings(images):
+    encodeList = []
+    for img in images:
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        encode = face_recognition.face_encodings(img)[0]
+        encodeList.append(encode)
+    return encodeList
+
+# def recognize(input_image):
+#     known_face_path = os.getenv("KNOWN_FACE_DIR")
+#     images = []
+#     classNames = []
+#     imgList = os.listdir(known_face_path)
+#     for image in imgList:
+#         if (image.endswith(".jpg")):
+#             currImg = cv2.imread(f'{known_face_path}/{image}')
+#             images.append(currImg)
+#             classNames.append(os.path.splitext(image))
+#             encodeListKnown = find_encodings(images)
+        
+#         else:
+#             print("Please first add faces!")
+
+#     print(classNames)
+
+
+    test_img = face_recognition.load_image_file(input_image)
+    test_img = cv2.cvtColor(test_img)
+
 def gen():
-    cap = cv2.VideoCapture(0)
-    ret = True
-    while ret:
-        ret,frame = cap.read()
-        #if extract_faces(frame)!=():
-        if ret != False:
-            cv2.putText(frame,'test',(30,30),cv2.FONT_HERSHEY_SIMPLEX,1,(255, 0, 20),2,cv2.LINE_AA)
+    no_of_imgs = int(os.getenv("IMAGES_TO_CAPTURE"))
+    if os.path.exists(face_path) == True:
+        print('Directory exists')
+    else:
+        os.makedirs(face_path)
+        print('Directory created!')
+
+    known_face_path = os.getenv("KNOWN_FACE_DIR")
+    if os.path.exists(known_face_path) == True:
+        print('Directory exists')
+    else:
+        os.makedirs(known_face_path)
+        print('Directory created!')
+
+    """ model_path = os.getenv("MODEL_PATH")
+    if os.path.exists(model_path) == True:
+        print('Directory exists')
+    else:
+        print('Please load/specify a trained model') """
+    
+    images = []
+    classNames = []
+    imgList = os.listdir(known_face_path)
+    #model = joblib.load(model_path)
+    #print("Model loaded successfully")
+
+    for image in imgList:
+        if (image.endswith(".jpg")):
+            currImg = cv2.imread(f'{known_face_path}/{image}')
+            images.append(currImg)
+            classNames.append(os.path.splitext(image)[0])
+            encodeListKnown = find_encodings(images)
+        
         else:
-            print('Closed')
-        cv2.imshow('Attendance',frame)
+            print("Please first add faces!")
+
+    print(classNames)
+    cap = cv2.VideoCapture(0)
+    i=0
+    sample_number = 1
+    count = 0
+    #measures = np.zeros(sample_number, dtype=np.float)
+    while True:
+        ret,frame = cap.read()
+        #measures[count%sample_number]=0
+        #height, weight = frame.shape[:2]
+        #if extract_faces(frame)!=():
+        
+            #cv2.putText(frame,'test',(30,30),cv2.FONT_HERSHEY_SIMPLEX,1,(255, 0, 20),2,cv2.LINE_AA)
+        frameS = cv2.resize(frame, (0,0), None, 0.25, 0.25)
+        frameS = cv2.cvtColor(frameS, cv2.COLOR_BGR2RGB)
+        faceCurrFrame = face_recognition.face_locations(frameS)
+        encodeCurrFrame = face_recognition.face_encodings(frameS, faceCurrFrame)
+        #cv2.imwrite(face_path+'/test'+str(i)+'.jpg', frame)
+            
+        for encodedFace, faceLoc in zip(encodeCurrFrame, faceCurrFrame):
+            matches = face_recognition.compare_faces(encodeListKnown, encodedFace)
+            faceDis = face_recognition.face_distance(encodeListKnown, encodedFace)
+            print(faceDis)
+            matchedInd = np.argmin(faceDis)
+
+            if matches[matchedInd]:
+                name = classNames[matchedInd].upper()
+                print(name)
+                y1, x2, y2, x1 = faceLoc
+                y1, x2, y2, x1 = y1*4, x2*4, y2*4, x1*4 
+                cv2.rectangle(frame, (x1,y1),(x2,y2),(0,255,0), 2)
+                cv2.rectangle(frame, (x1,y2-35),(x2,y2),(0,255,0), cv2.FILLED)
+                cv2.putText(frame, name, (x1+6, y2-6), cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),2)
+            
+        cv2.imshow('Webcam',frame)
         if cv2.waitKey(1)==27:
             break
     cap.release()
     cv2.destroyAllWindows()
+    mark_attendence(name)
 
 @app.route('/')
 def home():
     if 'loggedin' in session:
-        return render_template('home.html', username=session['username'])
+        conn = get_db_connection()
+        courses = conn.execute("SELECT * FROM courses").fetchall()
+        classes = conn.execute("SELECT * FROM classes").fetchall()
+        conn.close()
+        print(len(courses))
+        print(len(classes))
+        return render_template('home.html', username=session['username'], courses=courses, classes=classes)
     
     return redirect(url_for('login'))
 
@@ -153,22 +289,121 @@ def profile():
 @app.route('/recognize')
 def recognize():
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
     if 'loggedin' in session:
         cursor.execute('SELECT * FROM emp WHERE e_id = %s', [(session['id'])])
         account = cursor.fetchone()
+        conn = get_db_connection()
+        cur = conn.cursor()
+        attendences = cur.execute("SELECT * FROM attendences").fetchall()
+        print(attendences)
+        conn.commit()
+        conn.close()
 
-        return render_template('recognize.html', account=account)
+        return render_template('recognize.html', account=account, attendences=attendences)
     return redirect(url_for('login'))
 
 @app.route('/video_feed')
 def video():
-    global video
+    if 'loggedin' in session:
+        #global video
     #return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-    gen()
+        gen()
+        #return render_template('recognize.html', username=session['username'])
+        return redirect(url_for('recognize'))
+    return redirect(url_for('login'))
+    
     #return Response('Closed')
-    return redirect(url_for('recognize'))
+    #return redirect(url_for('recognize'))
 
+@app.route('/create_course', methods=["POST"])
+def create_course():
+    if request.method == 'POST':
+        class_name = request.form.get("class_name", False)
+        conn = get_db_connection()
+        conn.execute('INSERT INTO courses (c_name) VALUES (?)',(class_name, ))
+        conn.commit()
+        conn.close()
+        flash('Course added successfully.')
+        return redirect(url_for('home'))
+
+@app.route('/delete_course', methods=["POST"])
+def delete_course():
+    if request.method == "POST":
+        conn = get_db_connection()
+        c_id = request.form.get("c_id", False)
+        conn.execute('DELETE FROM courses WHERE c_id = (?)', (c_id,))
+        conn.commit()
+        conn.close()
+        flash("Course deleted successfully.")
+        return redirect(url_for('home'))
+
+
+@app.route('/update_course', methods = ["GET", "POST"])
+def update_course():
+    if request.method == "POST":
+        conn = get_db_connection()
+        c_id = request.form.get("c_id", False)
+        upd_name = request.form['course_name']
+        conn.execute('UPDATE courses SET c_name = (?) WHERE c_id = (?)', (upd_name, c_id))
+        conn.commit()
+        conn.close()
+        flash("Course update successfully.")
+        return redirect(url_for('home'))
+
+#------------CLASSES-------------------
+@app.route('/create_class', methods=["GET", "POST"])
+def create_class():
+    if request.method == "POST":
+        course_id = int(request.form.get("c_id", False))
+        room_no = request.form['room_no']
+        floor = request.form['floor']
+        date = request.form['date']
+        start_time = request.form['start_time']
+        end_time = request.form['end_time']
+        conn = get_db_connection()
+        conn.execute("INSERT INTO classes(course_id, room_no, floor, date, start_time, end_time) VALUES (?,?,?,?,?,?)",(course_id, room_no, floor, date, start_time, end_time))
+        conn.commit()
+        conn.close()
+        flash("Class created successfully.")
+        return redirect(url_for('home'))
+
+@app.route('/update_class', methods=["GET", "POST"])
+def update_class():
+    if request.method == "POST":
+        class_id = int(request.form.get("cls_id", False))
+        room_no = request.form['room_no']
+        floor = request.form['floor']
+        start_time = request.form['start_time']
+        end_time = request.form['end_time']
+        conn = get_db_connection()
+        conn.execute("UPDATE classes SET room_no=(?), floor=(?), start_time=(?), end_time=(?) WHERE cls_id=(?)",(room_no, floor, start_time, end_time, class_id))
+        conn.commit()
+        conn.close()
+        flash("Class update successfully.")
+        return redirect(url_for('home'))
+
+@app.route('/delete_class', methods=["GET", "POST"])
+def delete_class():
+    if request.method == "POST":
+        class_id = request.form.get("cls_id", False)
+        conn = get_db_connection()
+        conn.execute("DELETE FROM classes WHERE cls_id=(?)", (class_id,))
+        conn.commit()
+        conn.close()
+        flash("Class deleted successfully.")
+        return redirect(url_for('home'))
+
+#---------------Attendence-------------------------------------
+@app.route('/delete_attendence', methods=["GET","POST"])
+def delete_attendence():
+    if request.method == "POST":
+        att_id = request.form.get("a_id", False)
+        conn = get_db_connection()
+        conn.execute("DELETE FROM attendences WHERE a_id=(?)", (att_id,))
+        conn.commit()
+        conn.close()
+        flash("Attendence deleted successfully.")
+        return redirect(url_for('recognize'))
 
 """
 url = os.getenv("DATABASE_URL")
