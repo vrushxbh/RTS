@@ -11,6 +11,13 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link href="//cdn.datatables.net/1.13.2/css/jquery.dataTables.min.css" rel="stylesheet">
+    <script src="//cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js"></script>
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
 </head>
@@ -18,43 +25,43 @@
      <div class="container-fluid">
     <div class="row flex-nowrap">
         <div class="col-auto col-sm-3 col-xl-2 px-sm-2 px-0 sidebar">
-            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2  min-vh-100">
                 <div class="card card-temp" >
-                  <img src="https://codingyaar.com/wp-content/uploads/bootstrap-profile-card-image.jpg" class="card-img-top profile-img" alt="...">
+                  <img src="https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg" class="card-img-top profile-img" alt="...">
                   <div class="card-body">
-                    <h3 class="">Professor</h3>
+                    <h3 class="">{% block user %}{% endblock %}</h3>
                     <h5 class="card-text">Admin</h5>
                   </div>
                 </div>
                 <hr>
                 <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
                     <li class="nav-item">
-                        <a href="{{ url_for('home') }}" class="nav-link align-middle px-0 text-white">
+                        <a href="{{ url_for('home') }}" class="nav-link align-middle px-0 " style="color: #000100;">
                             <i class="fa fa-home"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                      <a href="{{ url_for('profile') }}" class="nav-link align-middle px-0 text-white">
+                      <a href="{{ url_for('profile') }}" class="nav-link align-middle px-0 " style="color: #000100;">
                           <i class="fa fa-user"></i> <span class="ms-1 d-none d-sm-inline">Profile</span>
                       </a>
                   </li>
                   <li class="nav-item">
-                    <a href="{{ url_for('recognize') }}" class="nav-link align-middle px-0 text-white">
+                    <a href="{{ url_for('recognize') }}" class="nav-link align-middle px-0 " style="color: #000100;">
                         <i class="fa fa-user"></i> <span class="ms-1 d-none d-sm-inline">Attendence Dashboard</span>
                     </a>
                 </li>
                   <li class="nav-item">
-                    <a href="{{ url_for('logout') }}" class="nav-link align-middle px-0 text-white">
+                    <a href="{{ url_for('logout') }}" class="nav-link align-middle px-0 " style="color: #ff0c0c;">
                         <i class="fa fa-power-off"></i> <span class="ms-1 d-none d-sm-inline">Signout</span>
                     </a>
                 </li>
                 </ul>
             </div>
         </div>
-        <div class="col" style="padding: 0%;height: 100vh;overflow-y: scroll;">
-          <nav class="navbar navbar-expand-sm navbar-light bg-light">
+        <div class="col mainparts" style="padding: 0%;height: 100vh;overflow-y: scroll;">
+          <nav class="navbar navbar-expand-sm navbar-light" style="padding-left: 1.5%; padding-right: 1.5%;padding-top: 1.5%;">
             <div class="container-fluid">
-              <a class="navbar-brand header-title"><b>{% block profile %}{% endblock %}</b></a>
+              <a class="navbar-brand header-title">{% block profile %}{% endblock %}</a>
               <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
                 <span class="navbar-toggler-icon"></span>
               </button>
@@ -80,7 +87,7 @@
               </div>
             </div>
           </nav>
-        <div class="ui text container-fluid">
+        <div class="" style="padding-left: 1.5%; padding-right: 1.5%;">
             {% block content %}{% endblock %}
         </div>
         </div>
