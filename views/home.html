@@ -59,7 +59,7 @@
             <h4 class="title-card">Courses</h4>
         </div>
         <div class="col-4" style="text-align: end;">
-            <button type="button" class="btn btn-primary btn-sm col-auto" data-bs-toggle="modal"
+            <button type="button" class="btn btn-primary btn-sm col-auto btn_add_course" data-bs-toggle="modal"
                 data-bs-target="#classModal">
                 Add course
             </button>
@@ -224,7 +224,8 @@
                 <table class="table table-hover table-bordered tl" id="myTable">
                     <thead>
                         <tr>
-                            <th onclick="sortTable(0)">Course Name</th>
+                            <th onclick="sortTable(0)">Class ID</th>
+                            <th>Course ID</th>
                             <th onclick="sortTable(1)">Room</th>
                             <th onclick="sortTable(2)">Floor</th>
                             <th onclick="sortTable(3)">Start Time</th>
@@ -240,6 +241,7 @@
                             <td>{{class['cls_id']}}
                                 <!-- <button type="button" class="btn float-right take-attendance">Take Attendance</button> -->
                             </td>
+                            <td>{{class['course_id']}}</td>
                             <td>{{class['room_no']}}</td>
                             <td>{{class['floor']}}</td>
                             <td>{{class['start_time']}}</td>

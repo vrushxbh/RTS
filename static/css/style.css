@@ -387,3 +387,22 @@ tr td:last-child {
   color: #212529;
   margin: 0% 0%;
 }
+
+.btn_add_course{
+  box-shadow: 3px 3px black;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  border: 3px solid black;
+  background-color: #F97253;
+  color: black;
+  margin-bottom: 7px;
+}
+
+.btn_add_course:hover{
+  box-shadow: 3px 3px black;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  border: 3px solid black;
+  background-color: #fd9982;
+  color: black;
+}

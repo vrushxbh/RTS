@@ -75,9 +75,11 @@ def mark_attendence(id, class_id, course_id):
     if rec_exists == True:
         print("Record already exists for today.")
     else:
-        #cursor.execute("SELECT s.s_id, s.f_name,")
+        #cursor.execute("SELECT s.s_id, s.f_name,")'
+        cur = conn.cursor()
+        student_data = cur.execute("SELECT f_name FROM students WHERE s_id="+id).fetchone()
         conn.execute("INSERT INTO attendences(s_id, f_name, class_id, course_id, date, time) VALUES (?,?,?,?,?,?)",
-                     (id, "Test", class_id, course_id, date.today().strftime('%d/%m/%Y'),datetime.now().strftime('%H:%M')))
+                     (id, student_data[0], class_id, course_id, date.today().strftime('%d/%m/%Y'),datetime.now().strftime('%H:%M')))
     conn.commit()
     conn.close()
 
