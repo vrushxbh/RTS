@@ -1,0 +1,159 @@
+{% extends 'layout.html' %}
+
+{% block title %}Student{% endblock %}
+
+{% block content %}
+<h1 class="ui header">Students</h1>
+
+<div class="flash">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages%}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>{{message}}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
+<div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-table">
+                <table class="table table-hover table-bordered tl" id="myTable" >
+                    <tr>
+                        <th onclick="sortTable(0)">Mat. No.</th>
+                        <th></th>
+                        <th onclick="sortTable(2)">First name</th>
+                        <th onclick="sortTable(3)">Last name</th>
+                        <th onclick="sortTable(4)">Email ID</th>
+                        <th onclick="sortTable(5)">Date of birth</th>
+                        <th onclick="sortTable(6)">Gender</th>
+                        <th onclick="sortTable(7)">Address</th>
+                        <th onclick="sortTable(8)">City</th>
+                        <th onclick="sortTable(9)">State</th>
+                        <th onclick="sortTable(9)">Country</th>
+                        <th onclick="sortTable(10)">PLZ</th>
+                    </tr>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{student['s_id']}}</td>
+                        <td><img src="static/known_faces/{{student['s_id']}}.jpg" class="table-image"></td>
+                        <td>{{student['f_name']}}</td>
+                        <td>{{student['l_name']}}</td>
+                        <td>{{student['email_id']}}</td>
+                        <td>{{student['dob']}}</td>
+                        <td>{{student['gender']}}</td>
+                        <td>{{student['address_line_1']}}, {{student['address_line_2']}}</td>
+                        <td>{{student['address_city']}}</td>
+                        <td>{{student['address_state']}}</td>
+                        <td>{{student['address_country']}}</td>
+                        <td>{{student['address_plz']}}</td>
+                    </tr>
+
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="col-12">
+            <div class="card card-form">
+<div class="card-title cardtitle">
+    <h4>Add student</h4>
+</div>
+                <form action="{{ url_for('create_student') }}" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <label class="form-label input-styling-label">First name</label>
+                                <input type="text" class="form-control input-styling" name="f_name" placeholder="John"
+                                    required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label input-styling-label">Last name</label>
+                                <input type="text" class="form-control input-styling" name="l_name"
+                                    placeholder="Mueller" required>
+
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <label class="form-label input-styling-label">Email ID</label>
+                                <input type="email" class="form-control input-styling" name="email_id"
+                                    placeholder="johnmueller@gmail.com" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <label class="form-label input-styling-label">Date of birth</label>
+                                <input type="date" class="form-control input-styling" name="dob" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label input-styling-label">Gender</label>
+                                <select name="gender" class="selectpicker form-control input-styling">
+                                    <option value="M">Male</option>
+                                    <option value="F">Female</option>
+                                    <option value="O">Others</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <label class="form-label input-styling-label">Address </label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control input-styling" name="address_line_1"
+                                    placeholder="Luebecker Str. 5" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control input-styling" name="address_line_2"
+                                    placeholder="12 O.G.">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <label class="form-label input-styling-label">City</label>
+                                <input type="text" class="form-control input-styling" name="city"
+                                    placeholder="Frankfurt" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label input-styling-label">State</label>
+                                <input type="text" class="form-control input-styling" name="state" placeholder="Hessen"
+                                    required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label input-styling-label">Country</label>
+                                <input type="text" class="form-control input-styling" name="country"
+                                    placeholder="Germany" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label input-styling-label">Pin code</label>
+                                <input type="text" class="form-control input-styling" name="plz" placeholder="65760"
+                                    required>
+
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label input-styling-label">Profile image</label>
+                                <input type="file" class="form-control input-styling" name="image" required
+                                    accept=".jpg">
+                            </div>
+                        </div>
+
+                        <center>
+                            <button type="submit" class="btn btn-primary input-styling-button mt-4 py-1">Create</button>
+                        </center>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -2,33 +2,34 @@ import sqlite3;
 
 conn = sqlite3.connect('database.db')
 
-# sql_query = '''DROP TABLE IF EXISTS students;
+sql_query = '''DROP TABLE IF EXISTS students;
 
-# CREATE TABLE students (s_id INTEGER PRIMARY KEY AUTOINCREMENT,
-#                         f_name TEXT NOT NULL,
-#                         l_name TEXT NOT NULL,
-#                         email_id TEXT NOT NULL,
-#                         dob TEXT,
-#                         gender TEXT,
-#                         address_line_1 TEXT,
-#                         address_line_2 TEXT,
-#                         address_city TEXT NOT NULL,
-#                         address_state TEXT NOT NULL,
-#                         address_country TEXT NOT NULL,
-#                         address_plz TEXT NOT NULL
-#                         );'''
+CREATE TABLE students (s_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        f_name TEXT NOT NULL,
+                        l_name TEXT NOT NULL,
+                        email_id TEXT NOT NULL,
+                        dob TEXT,
+                        gender TEXT,
+                        address_line_1 TEXT,
+                        address_line_2 TEXT,
+                        address_city TEXT NOT NULL,
+                        address_state TEXT NOT NULL,
+                        address_country TEXT NOT NULL,
+                        address_plz TEXT NOT NULL,
+                        image_link TEXT NOT NULL
+                        );'''
 
-sql_query = '''DROP TABLE IF EXISTS attendences;
+# sql_query = '''DROP TABLE IF EXISTS attendences;
 
-CREATE TABLE attendences (a_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            s_id INTEGER,
-                            f_name TEXT,
-                            class_id INTEGER,
-                            course_id INTEGER,
-                            date DATE,
-                            time TIMESTAMP,
-                            FOREIGN KEY(s_id) REFERENCES classes(cls_id));
-'''
+# CREATE TABLE attendences (a_id INTEGER PRIMARY KEY AUTOINCREMENT,
+#                             s_id INTEGER,
+#                             f_name TEXT,
+#                             class_id INTEGER,
+#                             course_id INTEGER,
+#                             date DATE,
+#                             time TIMESTAMP,
+#                             FOREIGN KEY(s_id) REFERENCES classes(cls_id));
+# '''
 
 conn.executescript(sql_query)
 
@@ -43,10 +44,10 @@ conn.executescript(sql_query)
 #conn.execute("DELETE FROM students WHERE s_id BETWEEN 5 AND 8;")
 #conn.execute("DELETE FROM attendences;")
 
-cur = conn.cursor()
-count = cur.execute("SELECT * FROM attendences;").fetchall()
+# cur = conn.cursor()
+# count = cur.execute("SELECT * FROM attendences;").fetchall()
 
-print(count)
+# print(count)
 
 conn.commit()
 conn.close()

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 import re
 from flask import Flask, Response, flash, redirect, render_template, request, session, url_for
 import os
@@ -59,7 +59,7 @@ def gen_frames():
             break
     #video.release()
 
-def mark_attendence(id):
+def mark_attendence(id, class_id, course_id):
     # att_path = os.getenv("ATTENDENCE_DIR")
     # att_path = att_path + "/" + datetime.now().strftime('%B')+str(datetime.now().year)
     # if os.path.exists(att_path) == True:
@@ -77,7 +77,7 @@ def mark_attendence(id):
     else:
         #cursor.execute("SELECT s.s_id, s.f_name,")
         conn.execute("INSERT INTO attendences(s_id, f_name, class_id, course_id, date, time) VALUES (?,?,?,?,?,?)",
-                     (id, "Test", "1", "2", "5/2/2023","15:30"))
+                     (id, "Test", class_id, course_id, date.today().strftime('%d/%m/%Y'),datetime.now().strftime('%H:%M')))
     conn.commit()
     conn.close()
 
@@ -141,6 +141,7 @@ def gen():
     
     images = []
     classNames = []
+    currAttendence = []
     imgList = os.listdir(known_face_path)
     #model = joblib.load(model_path)
     #print("Model loaded successfully")
@@ -182,19 +183,27 @@ def gen():
 
             if matches[matchedInd]:
                 name = classNames[matchedInd].upper()
+                if name not in currAttendence:
+                    currAttendence.append(name)
+                else:
+                    pass
                 print(name)
                 y1, x2, y2, x1 = faceLoc
                 y1, x2, y2, x1 = y1*4, x2*4, y2*4, x1*4 
                 cv2.rectangle(frame, (x1,y1),(x2,y2),(0,255,0), 2)
                 cv2.rectangle(frame, (x1,y2-35),(x2,y2),(0,255,0), cv2.FILLED)
                 cv2.putText(frame, name, (x1+6, y2-6), cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),2)
-            
+
         cv2.imshow('Webcam',frame)
         if cv2.waitKey(1)==27:
             break
     cap.release()
     cv2.destroyAllWindows()
-    mark_attendence(name)
+    print(currAttendence)
+    return currAttendence
+    # for i in currAttendence:
+    #     mark_attendence(i)
+    # currAttendence.clear()
 
 @app.route('/')
 def home():
@@ -205,7 +214,15 @@ def home():
         conn.close()
         print(len(courses))
         print(len(classes))
-        return render_template('home.html', username=session['username'], courses=courses, classes=classes)
+        img_list = ['https://img.freepik.com/free-vector/typing-concept-illustration_114360-363.jpg?w=2000v',
+'https://cdni.iconscout.com/illustration/premium/thumb/coding-study-4024615-3328754.png',
+'https://media.istockphoto.com/id/1241710244/vector/working-at-home-vector-flat-style-illustration-online-career-coworking-space-illustration.jpg?s=612x612&w=0&k=20&c=U34U9zhLBWDEbfPmgmlnFJiP-EuWu7MEUCxUls_BnKU=',
+'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1Y4-E5TjYjx-WZPSDHmNUZydfxvI9F3PTFP1FNJkjuAhvhYKzBb9CgZD-2fnfsKQDtcY&usqp=CAU',
+'https://static.vecteezy.com/system/resources/thumbnails/000/116/552/small/free-flat-line-business-and-marketing-vector-illustration.jpg',
+'https://static.vecteezy.com/system/resources/thumbnails/000/152/199/small/linear-network-technology-icons.jpg',
+'https://static.vecteezy.com/system/resources/thumbnails/000/140/421/small/free-vector-illustration-of-web-learning-concept.jpg']
+        
+        return render_template('home.html', username=session['username'], courses=courses, classes=classes, img_list=img_list, i=0)
     
     return redirect(url_for('login'))
 
@@ -286,34 +303,115 @@ def profile():
     
     return redirect(url_for('login'))
 
-@app.route('/recognize')
-def recognize():
+@app.route('/student', methods=["GET","POST"])
+def student():
+    cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    if 'loggedin' in session:
+        cursor.execute('SELECT * FROM emp WHERE e_id = %s', [(session['id'])])
+        account = cursor.fetchone()
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+        students = cur.execute("SELECT * FROM students").fetchall()
+        conn.commit()
+        conn.close()
+
+        return render_template('student.html', account=account, students=students)
+    
+    return redirect(url_for('login'))
+
+@app.route('/create_student', methods=["GET", "POST"])
+def create_student():
+    if request.method == "POST":
+        f_name = request.form['f_name']
+        l_name = request.form['l_name']
+        email_id = request.form['email_id']
+        dob = request.form['dob']
+        gender = request.form.get('gender')
+        add_1 = request.form['address_line_1']
+        add_2 = request.form.get('address_line_2', False)
+        city = request.form['city']
+        state = request.form['state']
+        country = request.form['country']
+        plz = request.form['plz']
+        fileobj = request.files['image']
+        file_extensions =  ["JPG"]
+        uploaded_file_extension = fileobj.filename.split(".")[1]
+        #validating file extension
+        if(uploaded_file_extension.upper() in file_extensions):
+
+            conn = get_db_connection()
+            cur = conn.cursor()
+            query = "SELECT * FROM students WHERE f_name='"+f_name+"' AND l_name='"+l_name+"' AND email_id='"+str(email_id)+"';"
+            # print(query)
+            #valid = [0,0]
+            valid = cur.execute(query).fetchall()
+            if len(valid)!=0:
+                flash("Student already exists.")
+            else:
+                try:
+                    filename = cur.execute("SELECT MAX(s_id) FROM students").fetchone()
+                    if filename['MAX(s_id)'] is None:
+                        filename = '1.jpg'
+                    else:
+                        filename = str(filename['MAX(s_id)']+1)+'.jpg'
+                    print(filename)
+                    fileobj.filename = filename
+                    destination_path= f"static/known_faces/"
+                    fileobj.save(destination_path+filename)
+                    #inserting data into table usercontent
+                    conn.execute("INSERT INTO students (f_name, l_name, email_id, dob, gender, address_line_1, address_line_2, address_city, address_state, address_country, address_plz, image_link) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", 
+                (f_name,l_name, email_id, dob, gender, add_1, add_2, city, state, country, plz,destination_path))
+                    conn.commit()
+                    conn.close()
+                except sqlite3.Error as error:
+                    #using flash function of flask to flash errors.
+                    flash(f"{error}")
+            return redirect(url_for('student'))
+        else:
+            flash("Only images are accepted")
+    return redirect(url_for('student'))
+
+
+@app.route('/attendence')
+def attendence():
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if 'loggedin' in session:
         cursor.execute('SELECT * FROM emp WHERE e_id = %s', [(session['id'])])
         account = cursor.fetchone()
+        query = "SELECT * FROM attendences;"
         conn = get_db_connection()
         cur = conn.cursor()
-        attendences = cur.execute("SELECT * FROM attendences").fetchall()
+        attendences = cur.execute(query).fetchall()
         print(attendences)
         conn.commit()
         conn.close()
 
-        return render_template('recognize.html', account=account, attendences=attendences)
+        return render_template('attendence.html', account=account, attendences=attendences)
     return redirect(url_for('login'))
 
-@app.route('/video_feed')
-def video():
+@app.route('/video_feed/<int:class_id>/<int:course_id>')
+def video(class_id, course_id):
     if 'loggedin' in session:
         #global video
     #return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-        gen()
-        #return render_template('recognize.html', username=session['username'])
-        return redirect(url_for('recognize'))
+        currAttendence = gen()
+        print(currAttendence)
+        for i in currAttendence:
+            mark_attendence(i, class_id, course_id)
+        currAttendence.clear()
+        #return render_template('attendence.html', username=session['username'])
+        return redirect(url_for('attendence'))
     return redirect(url_for('login'))
     
     #return Response('Closed')
-    #return redirect(url_for('recognize'))
+    #return redirect(url_for('attendence'))
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
 
 @app.route('/create_course', methods=["POST"])
 def create_course():
@@ -403,7 +501,7 @@ def delete_attendence():
         conn.commit()
         conn.close()
         flash("Attendence deleted successfully.")
-        return redirect(url_for('recognize'))
+        return redirect(url_for('attendence'))
 
 """
 url = os.getenv("DATABASE_URL")

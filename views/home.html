@@ -3,11 +3,16 @@
 {% block title %}Home{% endblock %}
 
 {% block profile %}
-<p>Welcome back, {{ username }}</p>
+
+{% endblock %}
+
+{% block user %}
+{{username}}
 {% endblock %}
 
 {% block content %}
 
+<h1 class="ui header">Welcome back, {{ username }}</h1>
 <div class="flash">
     {% with messages = get_flashed_messages() %}
     {% if messages %}
@@ -22,214 +27,340 @@
 </div>
 <div class="modal fade" id="classModal" tabindex="-1" aria-labelledby="classModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="classModalLabel">Create New Class</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <div class="modal-header modalhead">
+                <h1 class="modal-title fs-5" id="classModalLabel">Create New Class</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="row" method="post" action="/create_course">
+                    <div class="row">
+                        <input name="class_name" class="form-control input-styling col-auto" type="text" id="class_name"
+                            placeholder="E.g. Data Structures" required>
+                    </div>
+                    <div class="row">
+                        <center>
+                        <button type="submit"
+                            class="btn btn-primary input-styling-button col-auto input-styling-button">Add</button>
+                            </center>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="modal-body">
-            <form class="row" method="post" action="/create_course">
-                <div class="col-auto">
-                    <input name="class_name" class="form-control col-auto" type="text" id="class_name" placeholder="E.g. Data Structures" required>
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary col-auto">Add</button>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          
-        </div>
-      </div>
     </div>
-</div>  
-<div class="row mt-4">
-    <h3 class="col-auto">Course Information</h3>
-    <button type="button" class="btn btn-primary btn-sm col-auto" data-bs-toggle="modal" data-bs-target="#classModal">
-        Add course
-    </button>
 </div>
-<table>
-    <tr>
-        <th>Course Code</th>
-        <th>Course Name</th>
-        <th>Created On</th>
-        <th>Actions</th>
-        <th>Create new class</th>
-    </tr>
-    {% for course in courses %}
-    <tr>
-        <td>{{ course['c_id'] }}</td>
-        <td>{{ course['c_name'] }}</td>
-        <td>{{ course['created_on'] }}</td>
-        <td>
-            <a href="/update_course/{{ course['c_id'] }}" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{course['c_id']}}">Edit</a>
-            <a href="/delete_course/{{ course['c_id'] }}" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{course['c_id']}}">Delete</a>
-        </td>
-        <td>
-            <a href="/create_class/{{ course['c_id'] }}" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createClassModal{{course['c_id']}}">Create</a>
-        </td>
-    </tr>
-    <div id="editModal{{course['c_id']}}" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Update Information</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+
+<div class="container-fluid">
+
+    <br>
+    <div class="row">
+        <div class="col-8">
+            <h4 class="title-card">Courses</h4>
+        </div>
+        <div class="col-4" style="text-align: end;">
+            <button type="button" class="btn btn-primary btn-sm col-auto" data-bs-toggle="modal"
+                data-bs-target="#classModal">
+                Add course
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        {% for course in courses %}
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card card-home">
+                <img class="card-img-top current-course" src="{{img_list[i]}}" alt="Card image" style="width:100%">
+                <div class="card-body">
+                    <h6 style="font-size: 1.2rem; color: #646464;">{{course['c_id']}} - {{course['c_name']}}</h6>
                 </div>
-                <div class="modal-body">
-                    <form action="{{ url_for('update_course') }}" method="POST">
-                        <div class="form-group">
-                            <label>Name</label>
-                            <input type="hidden" name="c_id" id="c_id" value="{{course['c_id']}}">
-                            <input type="text" class="form-control" name="course_name" value="{{course['c_name']}}">
-                            <button type="submit" class="btn btn-primary col-auto">Update</button>
+                <div class="overlay">
+                    <div class="overlay-content">
+                        <!-- <a href="/update_course/{{ course['c_id'] }}" class="btn card_hover-button" data-bs-toggle="modal" data-bs-target="#editModal{{course['c_id']}}">Edit</a> -->
+                        <!-- <a href="/delete_course/{{ course['c_id'] }}" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{course['c_id']}}">Delete</a> -->
+                        <a href="/create_class/{{ course['c_id'] }}" data-bs-toggle="modal"
+                            data-bs-target="#createClassModal{{course['c_id']}}"
+                            class="btn float-right card_hover-button"><i class="fa fa-plus"></i></a>
+                        <a href="/update_course/{{ course['c_id'] }}" data-bs-toggle="modal"
+                            data-bs-target="#editModal{{course['c_id']}}" class="btn float-right card_hover-button"><i
+                                class="fa fa-pencil"></i></a>
+                        <a href="/delete_course/{{ course['c_id'] }}" data-bs-toggle="modal"
+                            data-bs-target="#deleteModal{{course['c_id']}}" class="btn float-right card_hover-button"><i
+                                class="fa fa-trash-o"></i></a>
+                    </div>
+                </div>
+
+                <div id="editModal{{course['c_id']}}" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header modalhead">
+                                <h4 class="modal-title">Update Information</h4>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{{ url_for('update_course') }}" method="POST">
+                                    <div class="form-group">
+                                        <label class="form-label modal-input-styling-label">Name</label>
+                                        <input type="hidden" name="c_id" id="c_id" value="{{course['c_id']}}">
+                                        <input type="text" class="form-control modal-input-styling" name="course_name"
+                                            value="{{course['c_name']}}">
+                                        <center>
+                                            <button type="submit"
+                                                class="btn btn-primary input-styling-button col-auto">Update</button>
+                                        </center>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </form>
+                    </div>
+                </div>
+                <div id="deleteModal{{course['c_id']}}" class="modal fade" role="dialog" tabindex="-1"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header modalhead">
+                                <h4 class="modal-title">Delete Information</h4>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{{ url_for('delete_course') }}" method="POST">
+                                    <div class="form-group">
+                                        <label class="form-label modal-input-styling-label">Are you sure you want to
+                                            delete?</label>
+                                        <input type="hidden" name="c_id" id="c_id" value="{{course['c_id']}}">
+                                        <center>
+                                            <button type="submit"
+                                                class="btn btn-primary input-styling-button col-auto">Confirm</button>
+                                        </center>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="createClassModal{{course['c_id']}}" class="modal fade" role="dialog" tabindex="-1"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header modalhead">
+                                <h4 class="modal-title">Create a new class</h4>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{{ url_for('create_class') }}" method="POST">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <label class="form-label modal-input-styling-label">Course ID</label>
+                                                <input type="text" class="form-control modal-input-styling" name="c_id"
+                                                    value="{{course['c_id']}}" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <label class="form-label modal-input-styling-label">Class/Room number</label>
+                                            </div>
+                                            <div class="col-sm-6 d-none d-sm-block">
+
+                                                <label class="form-label modal-input-styling-label">Floor</label>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <input type="text" class="form-control modal-input-styling"
+                                                    name="room_no" placeholder="E.g. 2-213" required>
+                                            </div>
+
+                                            <div class="col-sm-6 d-block d-sm-none">
+
+                                                <label class="form-label modal-input-styling-label">Floor</label>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <input type="text" class="form-control modal-input-styling" name="floor"
+                                                    placeholder="E.g. 1 O.G." required>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <label class="form-label modal-input-styling-label">Date</label>
+                                                <input type="date" class="form-control modal-input-styling" name="date"
+                                                    required>
+                                            </div>
+                                            <div class="col-sm-4">
+
+                                                <label class="form-label modal-input-styling-label">Start time</label>
+                                                <input type="time" class="form-control modal-input-styling"
+                                                    name="start_time" required>
+                                            </div>
+                                            <div class="col-sm-4">
+
+                                                <label class="form-label modal-input-styling-label">End time</label>
+                                                <input type="time" class="form-control modal-input-styling"
+                                                    name="end_time" required>
+                                            </div>
+                                        </div>
+                                        <center>
+                                            <button type="submit"
+                                                class="btn btn-primary input-styling-button col-auto">Create</button>
+                                        </center>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+        {% endfor %}
     </div>
-    <div id="deleteModal{{course['c_id']}}" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Delete Information</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="{{ url_for('delete_course') }}" method="POST">
-                        <div class="form-group">
-                            <label>Are you sure you want to delete?</label>
-                            <input type="hidden" name="c_id" id="c_id" value="{{course['c_id']}}">
-                            <button type="submit" class="btn btn-primary col-auto">Confirm</button>
+
+    <br>
+    <h4 class="title-card">Today's Lectures</h4>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-table">
+
+                <table class="table table-hover table-bordered tl" id="myTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(0)">Course Name</th>
+                            <th onclick="sortTable(1)">Room</th>
+                            <th onclick="sortTable(2)">Floor</th>
+                            <th onclick="sortTable(3)">Start Time</th>
+                            <th onclick="sortTable(4)">End Time</th>
+                            <th>Actions</th>
+                            <!-- <th>Lastname</th>
+                            <th>Email</th> -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for class in classes %}
+                        <tr>
+                            <td>{{class['cls_id']}}
+                                <!-- <button type="button" class="btn float-right take-attendance">Take Attendance</button> -->
+                            </td>
+                            <td>{{class['room_no']}}</td>
+                            <td>{{class['floor']}}</td>
+                            <td>{{class['start_time']}}</td>
+                            <td>{{class['end_time']}}</td>
+                            <td>
+                                <a href="/video_feed/{{class['cls_id']}}/{{class['course_id']}}"
+                                    class="btn float-right option">
+                                    <i class="fa fa-video-camera"></i>
+                                </a>
+                                <a href="/update_class/{{ class['cls_id'] }}" type="button"
+                                    class="btn float-right option" data-bs-toggle="modal"
+                                    data-bs-target="#editClassModal{{class['cls_id']}}">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                <a href="/delete_class/{{ class['cls_id'] }}" class="btn float-right option"
+                                    data-bs-toggle="modal" data-bs-target="#deleteClassModal{{class['cls_id']}}">
+                                    <i class="fa fa-trash-o"></i>
+                                </a>
+                            </td>
+                        </tr>
+
+                        <div id="editClassModal{{class['cls_id']}}" class="modal fade" role="dialog" tabindex="-1"
+                            aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header modalhead">
+                                        <h4 class="modal-title">Update Information</h4>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="{{ url_for('update_class') }}" method="POST">
+                                            <div class="form-group">
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <label class="form-label modal-input-styling-label">Class/Room
+                                                            number</label>
+
+                                                    </div>
+                                                    <div class="col-sm-6 d-none d-sm-block">
+                                                        <label class="form-label modal-input-styling-label">Floor</label>
+
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <input type="hidden" name="cls_id" value="{{class['cls_id']}}">
+                                                        <input type="text" class="form-control modal-input-styling"
+                                                            name="room_no" value="{{class['room_no']}}">
+
+                                                    </div>
+                                                    <div class="col-sm-6 d-block d-sm-none">
+                                                        <label class="form-label modal-input-styling-label">Floor</label>
+
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <input type="text" class="form-control modal-input-styling"
+                                                            name="floor" value="{{class['floor']}}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-sm-4">
+                                                        <label class="form-label modal-input-styling-label">Date</label>
+                                                        <input type="date" class="form-control modal-input-styling"
+                                                            name="date" value="{{class['date']}}">
+
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <label class="form-label modal-input-styling-label">Start time</label>
+                                                        <input type="time" class="form-control modal-input-styling"
+                                                            name="start_time" value="{{class['start_time']}}">
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <label class="form-label modal-input-styling-label">End time</label>
+                                                        <input type="time" class="form-control modal-input-styling"
+                                                            name="end_time" value="{{class['end_time']}}">
+                                                    </div>
+                                                </div>
+
+
+                                                <center>
+                                                    <button type="submit"
+                                                        class="btn btn-primary input-styling-button col-auto">Update</button>
+                                                </center>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </form>
-                </div>
+                        <div id="deleteClassModal{{class['cls_id']}}" class="modal fade" role="dialog" tabindex="-1"
+                            aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header modalhead">
+                                        <h4 class="modal-title">Delete Information</h4>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="{{ url_for('delete_class') }}" method="POST">
+                                            <div class="form-group">
+                                                <label class="form-label modal-input-styling-label">Are you sure you want to
+                                                    delete?</label>
+                                                <input type="hidden" name="cls_id" value="{{class['cls_id']}}">
+                                                <center>
+                                                    <button type="submit"
+                                                        class="btn btn-primary input-styling-button col-auto">Confirm</button>
+                                                </center>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-    <div id="createClassModal{{course['c_id']}}" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Create a new class</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="{{ url_for('create_class') }}" method="POST">
-                        <div class="form-group">
-                            <label>Class/Room number</label>
-                            <input type="text" class="form-control" name="room_no" placeholder="E.g. 2-213" required>
-                            
-                            <label>Course ID</label>
-                            <input type="text" name="c_id" value="{{course['c_id']}}" readonly>
-
-                            <label>Floor</label>
-                            <input type="text" class="form-control" name="floor" placeholder="E.g. 1 O.G." required>
-
-                            <label>Date</label>
-                            <input type="date" class="form-control" name="date" required>
-
-                            <label>Start time</label>
-                            <input type="time" class="form-control" name="start_time" required>
-
-                            <label>End time</label>
-                            <input type="time" class="form-control" name="end_time" required>
-
-                            <button type="submit" class="btn btn-primary col-auto">Create</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-</table>
-
-<h3 class="mt-4">Class Information</h3>
-<table>
-    <tr>
-        <th>Class ID</th>
-        <th>Course ID</th>
-        <th>Room</th>
-        <th>Floor</th>
-        <th>Date</th>
-        <th>Start time</th>
-        <th>End time</th>
-        <th>Actions</th>
-        <th>Add attendence</th>
-    </tr>
-    {% for class in classes %}
-    <tr>
-        <td>{{class['cls_id']}}</td>
-        <td>{{class['course_id']}}</td>
-        <td>{{class['room_no']}}</td>
-        <td>{{class['floor']}}</td>
-        <td>{{class['date']}}</td>
-        <td>{{class['start_time']}}</td>
-        <td>{{class['end_time']}}</td>
-        <td>
-            <a href="/update_class/{{ class['cls_id'] }}" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editClassModal{{class['cls_id']}}">Edit</a>
-            <a href="/delete_class/{{ class['cls_id'] }}" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteClassModal{{class['cls_id']}}">Delete</a>
-        </td>
-        <td>
-            <a href="#" class="btn btn-primary btn-sm">Add</a>
-        </td>
-    </tr>
-    <div id="editClassModal{{class['cls_id']}}" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Update Information</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="{{ url_for('update_class') }}" method="POST">
-                        <div class="form-group">
-                            <label>Class/Room number</label>
-                            <input type="hidden" name="cls_id" value="{{class['cls_id']}}">
-                            <input type="text" class="form-control" name="room_no" value="{{class['room_no']}}">
-
-                            <label>Floor</label>
-                            <input type="text" class="form-control" name="floor" value="{{class['floor']}}">
-
-                            <label>Date</label>
-                            <input type="date" class="form-control" name="date" value="{{class['date']}}">
-
-                            <label>Start time</label>
-                            <input type="time" class="form-control" name="start_time" value="{{class['start_time']}}">
-
-                            <label>End time</label>
-                            <input type="time" class="form-control" name="end_time" value="{{class['end_time']}}">
-
-                            <button type="submit" class="btn btn-primary col-auto">Update</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="deleteClassModal{{class['cls_id']}}" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Delete Information</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="{{ url_for('delete_class') }}" method="POST">
-                        <div class="form-group">
-                            <label>Are you sure you want to delete?</label>
-                            <input type="hidden" name="cls_id" value="{{class['cls_id']}}">
-                            <button type="submit" class="btn btn-primary col-auto">Confirm</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-</table>
+</div>
 {% endblock %}
